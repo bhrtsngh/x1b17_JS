@@ -1,6 +1,7 @@
 console.log("Start");
 let AdFoundArrAdios = [];
 let AdFoundArrAuditude = [];
+var request=0;
 
 function asynCalltoFile(file){
         fetch(file).then((response)=>{
@@ -18,11 +19,11 @@ function getData(data){
    let splitNewLine = data.split('\n'),eachRecord;
    let noOfLines = splitNewLine.length;
     //console.log(noOfLines)
-    let i =0,x=[];
-    for(let i=0;i<500;i++){
+    for(i=0;i<100;i++){
         eachRecord = splitNewLine[i].match(/(?<=GET\s+).*?(?=\s+HTTP)/gs);
         adios(eachRecord,i);
         auditude(eachRecord,i);
+        request =i;
     }
     
 }
@@ -30,11 +31,28 @@ function getData(data){
 setTimeout(function(){
     AdFoundArrAdios = AdFoundArrAdios.sort();
     AdFoundArrAuditude = AdFoundArrAuditude.sort();
+    diffValue = AdFoundArrAuditude.length - AdFoundArrAdios.length;
+    console.log("Difference is - "+diffValue+" out of Total "+request+1+" request");
+
     let difference = AdFoundArrAuditude
                  .filter(x => !AdFoundArrAdios.includes(x))
                  .concat(AdFoundArrAdios.filter(x => !AdFoundArrAuditude.includes(x)));
     console.log(difference);
-},60000)
+
+    var CsvString = "";
+    difference.forEach(function(RowItem, RowIndex) {
+        CsvString += RowItem + ',';
+        CsvString += "\r\n";
+    });
+    CsvString = "data:application/csv," + encodeURIComponent(CsvString);
+    var x = document.createElement("A");
+    x.setAttribute("href", CsvString );
+    x.setAttribute("download","somedata.csv");
+    document.body.appendChild(x);
+    x.click()
+
+
+},10000)
 
 function adios(record,requestIndex){
     if(record!=null){
@@ -118,7 +136,7 @@ function removeURLParameter_cb(url) {
         var pars= urlparts[1].split(/[&;]/g);
 
         //reverse iteration as may be destructive
-        for (var i= pars.length; i-- > 0;) {    
+        for (let i= pars.length; i-- > 0;) {    
             //idiom for string.startsWith
             if (pars[i].lastIndexOf(prefix, 0) !== -1) {  
                 pars.splice(i, 1);
