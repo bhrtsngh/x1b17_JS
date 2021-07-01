@@ -15,18 +15,36 @@ function asynCalltoFile(file){
 //asynCalltoFile("test");
 asynCalltoFile("wurl_4Days");
 
-function getData(data){
+async function getData(data){
    let splitNewLine = data.split('\n'),eachRecord;
    let noOfLines = splitNewLine.length;
     //console.log(noOfLines)
-    for(i=0;i<100;i++){
+    for(i=0;i<1000;i++){
         eachRecord = splitNewLine[i].match(/(?<=GET\s+).*?(?=\s+HTTP)/gs);
         adios(eachRecord,i);
         auditude(eachRecord,i);
         request =i;
+        await itemRunner(i);
     }
     
 }
+
+async function itemRunner(item){
+    await delay();
+    console.log(item);
+}
+
+function delay(){
+    //return new Promise(){ (resolve => setTimeout(resolve, 3000))}
+
+    return new Promise(function(resolve, reject)
+    {
+        setTimeout(resolve, 300);
+        //.then(data => resolve(data))
+        //.catch(err => reject(err));
+    });
+        
+ }
 
 setTimeout(function(){
     AdFoundArrAdios = AdFoundArrAdios.sort();
