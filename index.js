@@ -11,38 +11,34 @@ function asynCalltoFile(file){
         })
 }
 
-//asynCalltoFile("wurl_1.5");
-//asynCalltoFile("test");
+
 asynCalltoFile("wurl_4Days");
 
 async function getData(data){
    let splitNewLine = data.split('\n'),eachRecord;
    let noOfLines = splitNewLine.length;
-    //console.log(noOfLines)
-    for(i=0;i<1000;i++){
-        eachRecord = splitNewLine[i].match(/(?<=GET\s+).*?(?=\s+HTTP)/gs);
-        adios(eachRecord,i);
-        auditude(eachRecord,i);
-        request =i;
-        await itemRunner(i);
+    console.log(noOfLines);
+    forLoop = async(i) => {
+        for(i=0;i<100;i++){
+            eachRecord = splitNewLine[i].match(/(?<=GET\s+).*?(?=\s+HTTP)/gs);
+            adios(eachRecord,i);
+            auditude(eachRecord,i);
+            request =i;
+            await itemRunner(i);
+        }
     }
-    
+    forLoop();
 }
 
 async function itemRunner(item){
     await delay();
-    console.log(item);
+    //console.log(item);
 }
-
+var countPromise=0;
 function delay(){
-    //return new Promise(){ (resolve => setTimeout(resolve, 3000))}
-
-    return new Promise(function(resolve, reject)
-    {
-        setTimeout(resolve, 300);
-        //.then(data => resolve(data))
-        //.catch(err => reject(err));
-    });
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, 200);
+    })
         
  }
 
@@ -56,21 +52,27 @@ setTimeout(function(){
                  .filter(x => !AdFoundArrAdios.includes(x))
                  .concat(AdFoundArrAdios.filter(x => !AdFoundArrAuditude.includes(x)));
     console.log(difference);
+    generateCSV(difference);
+    
 
+
+},10000)
+
+function generateCSV(data){
     var CsvString = "";
-    difference.forEach(function(RowItem, RowIndex) {
+    data.forEach(function(RowItem, RowIndex) {
         CsvString += RowItem + ',';
         CsvString += "\r\n";
     });
     CsvString = "data:application/csv," + encodeURIComponent(CsvString);
     var x = document.createElement("A");
     x.setAttribute("href", CsvString );
-    x.setAttribute("download","somedata.csv");
+    x.setAttribute("download","ABDiffResult.csv");
     document.body.appendChild(x);
-    x.click()
+    //x.click()
+}
 
 
-},10000)
 
 function adios(record,requestIndex){
     if(record!=null){
@@ -109,30 +111,30 @@ function auditude(record,requestIndex){
                                     redirectURL=removeURLParameter_cb(redirectURL);
                                     adID = adDetails.getAttribute("id");
                                     if(domain=="http://ad.auditude.com"){
-                                        AdFoundArrAuditude.push(record+" "+adSystem+" "+redirectURL);
+                                        //AdFoundArrAuditude.push(record+" "+adSystem+" "+redirectURL);
                                        // AdFoundArrAuditude.push(record);
                                       //  AdFoundArrAuditude.push(adSystem);
                                       //  AdFoundArrAuditude.push(redirectURL);
                                     }
                                     if(domain=="http://ad.primetime.adobe.com"){
-                                        AdFoundArrAdios.push(record+" "+adSystem+" "+redirectURL);    
+                                       // AdFoundArrAdios.push(record+" "+adSystem+" "+redirectURL);    
                                     }
                                     
                                     //console.log(adID,adSystem,redirectURL);
-                                   // console.log(requestIndex,"Ad Found");
+                                    //console.log(requestIndex,"Ad Found");
                                 }
                                 else {
-                                  //  console.log(requestIndex,"No Ad Found");
+                                    console.log(requestIndex,"No Ad Found");
                                 //console.log(i);
                                 }
                             }
                             else {
-                               // console.log(requestIndex,"No Lot Found");
+                                console.log(requestIndex,"No Lot Found");
                             }
                             
                         }    
                         else {
-                            //console.log(requestIndex,"No Pod Found");
+                            console.log(requestIndex,"No Pod Found "+ pod);
 
                         }             
                  }        
@@ -146,7 +148,6 @@ function auditude(record,requestIndex){
 
 
 function removeURLParameter_cb(url) {
-    //prefer to use l.search if you have a location/link object
     var urlparts= url.split('?');   
     if (urlparts.length>=2) {
 
