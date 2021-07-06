@@ -2,6 +2,7 @@ console.log("Start");
 let AdFoundArrAdios = [];
 let AdFoundArrAuditude = [];
 let NoAdAuditude = [];
+let NoAdAuditudeNoPod = [];
 var request=0;
 
 function asynCalltoFile(file){
@@ -137,6 +138,7 @@ function auditude(record,requestIndex){
                         }    
                         else {
                             console.log(requestIndex,"No Pod Found "+ pod);
+                            NoAdAuditudeNoPod,push(url);
 
                         }             
                  }        
