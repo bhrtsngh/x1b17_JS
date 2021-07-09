@@ -1,6 +1,8 @@
 console.log("Start");
 let AdFoundArrAdios = [];
 let AdFoundArrAuditude = [];
+let NoAdAuditude = [];
+let NoPodAuditude = [];
 var request=0;
 
 function asynCalltoFile(file){
@@ -52,8 +54,8 @@ setTimeout(function(){
                  .filter(x => !AdFoundArrAdios.includes(x))
                  .concat(AdFoundArrAdios.filter(x => !AdFoundArrAuditude.includes(x)));
     console.log(difference);
-    generateCSV(difference);
-    
+    //generateCSV(difference);
+    generateCSV(NoAdAuditude);
 
 
 },10000)
@@ -69,7 +71,7 @@ function generateCSV(data){
     x.setAttribute("href", CsvString );
     x.setAttribute("download","ABDiffResult.csv");
     document.body.appendChild(x);
-    //x.click()
+    x.click()
 }
 
 
@@ -130,11 +132,13 @@ function auditude(record,requestIndex){
                             }
                             else {
                                 console.log(requestIndex,"No Lot Found");
+                                NoAdAuditude.push(url);
                             }
                             
                         }    
                         else {
                             console.log(requestIndex,"No Pod Found "+ pod);
+                            NoPodAuditude.push(url);
 
                         }             
                  }        
