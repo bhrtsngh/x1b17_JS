@@ -4,6 +4,7 @@ let AdFoundArrAuditude = [];
 let NoAdAuditude = [];
 let NoPodAuditude = [];
 var request=0;
+let recordArr = [];
 
 function asynCalltoFile(file){
         fetch(file).then((response)=>{
@@ -16,49 +17,57 @@ function asynCalltoFile(file){
 
 asynCalltoFile("wurl_4Days");
 
+
+
 async function getData(data){
    let splitNewLine = data.split('\n'),eachRecord;
    let noOfLines = splitNewLine.length;
     console.log(noOfLines);
-    forLoop = async(i) => {
-        for(i=0;i<100;i++){
-            eachRecord = splitNewLine[i].match(/(?<=GET\s+).*?(?=\s+HTTP)/gs);
-            adios(eachRecord,i);
-            auditude(eachRecord,i);
-            request =i;
-            await itemRunner(i);
-        }
+
+    
+
+    for(i=0;i<noOfLines;i++){
+      //await waitforme(1);
+      eachRecord = splitNewLine[i].match(/(?<=GET\s+).*?(?=\s+HTTP)/gs);
+      callAdRequest(eachRecord,i);
     }
-    forLoop();
+        console.log("Total Request "+ request);
+        //console.log( "Array "+ recordArr);
+
 }
 
-async function itemRunner(item){
-    await delay();
-    //console.log(item);
+function callAdRequest(eachRecord,i){
+      adios(eachRecord,i);
+      auditude(eachRecord,i);
+      request =i;
+      console.log("iteration number "+i);
 }
-var countPromise=0;
-function delay(){
-    return new Promise((resolve, reject) => {
-        setTimeout(resolve, 200);
-    })
-        
- }
 
-setTimeout(function(){
-    AdFoundArrAdios = AdFoundArrAdios.sort();
-    AdFoundArrAuditude = AdFoundArrAuditude.sort();
-    diffValue = AdFoundArrAuditude.length - AdFoundArrAdios.length;
-    console.log("Difference is - "+diffValue+" out of Total "+request+1+" request");
-
-    let difference = AdFoundArrAuditude
-                 .filter(x => !AdFoundArrAdios.includes(x))
-                 .concat(AdFoundArrAdios.filter(x => !AdFoundArrAuditude.includes(x)));
-    console.log(difference);
-    //generateCSV(difference);
-    generateCSV(NoAdAuditude);
+function waitforme(ms)  {
+    return new Promise( resolve => {
+     setTimeout(()=> {resolve('')} ,ms );
+ })}
 
 
-},10000)
+
+
+
+
+setTimeOutFunc = () => {
+    setTimeout(function(){
+        AdFoundArrAdios = AdFoundArrAdios.sort();
+        AdFoundArrAuditude = AdFoundArrAuditude.sort();
+        diffValue = AdFoundArrAuditude.length - AdFoundArrAdios.length;
+        console.log("Difference is - "+diffValue+" out of Total "+request+1+" request");
+    
+        let difference = AdFoundArrAuditude
+                     .filter(x => !AdFoundArrAdios.includes(x))
+                     .concat(AdFoundArrAdios.filter(x => !AdFoundArrAuditude.includes(x)));
+        console.log(difference);
+        //generateCSV(difference);
+        //generateCSV(NoAdAuditude);
+    },10000)
+}
 
 function generateCSV(data){
     var CsvString = "";
@@ -77,11 +86,10 @@ function generateCSV(data){
 
 
 function adios(record,requestIndex){
-    if(record!=null){
-        let audDomain = "http://ad.primetime.adobe.com"
-        let auditudeURL = audDomain + record;
-        getXMLResponse(auditudeURL,requestIndex,audDomain,record);
-    }
+    if (record==null) return
+    let adiosDomain = "http://ad.primetime.adobe.com"
+    let adiosURL = adiosDomain + record;
+    getXMLResponse(adiosURL,requestIndex,adiosDomain,record);
 }
 
 function auditude(record,requestIndex){
@@ -126,12 +134,12 @@ function auditude(record,requestIndex){
                                     //console.log(requestIndex,"Ad Found");
                                 }
                                 else {
-                                    console.log(requestIndex,"No Ad Found");
+                                    //console.log(requestIndex,"No Ad Found");
                                 //console.log(i);
                                 }
                             }
                             else {
-                                console.log(requestIndex,"No Lot Found");
+                                //console.log(requestIndex,"No Lot Found");
                                 NoAdAuditude.push(url);
                             }
                             
