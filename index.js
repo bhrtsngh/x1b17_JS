@@ -5,6 +5,7 @@ let NoAdAuditude = [];
 let NoPodAuditude = [];
 var request=0;
 let recordArr = [];
+let totalCalls = 70;
 
 function asynCalltoFile(file){
         fetch(file).then((response)=>{
@@ -15,7 +16,7 @@ function asynCalltoFile(file){
 }
 
 
-asynCalltoFile("wurl_4Days");
+asynCalltoFile("nbc");
 
 
 
@@ -24,15 +25,13 @@ async function getData(data){
    let noOfLines = splitNewLine.length;
     console.log(noOfLines);
 
-    
-
-    for(i=0;i<noOfLines;i++){
+    for(i=1;i<totalCalls;i++){
       //await waitforme(1);
       eachRecord = splitNewLine[i].match(/(?<=GET\s+).*?(?=\s+HTTP)/gs);
       callAdRequest(eachRecord,i);
     }
         console.log("Total Request "+ request);
-        //console.log( "Array "+ recordArr);
+       // setTimeOutFunc();
 
 }
 
@@ -47,41 +46,6 @@ function waitforme(ms)  {
     return new Promise( resolve => {
      setTimeout(()=> {resolve('')} ,ms );
  })}
-
-
-
-
-
-
-setTimeOutFunc = () => {
-    setTimeout(function(){
-        AdFoundArrAdios = AdFoundArrAdios.sort();
-        AdFoundArrAuditude = AdFoundArrAuditude.sort();
-        diffValue = AdFoundArrAuditude.length - AdFoundArrAdios.length;
-        console.log("Difference is - "+diffValue+" out of Total "+request+1+" request");
-    
-        let difference = AdFoundArrAuditude
-                     .filter(x => !AdFoundArrAdios.includes(x))
-                     .concat(AdFoundArrAdios.filter(x => !AdFoundArrAuditude.includes(x)));
-        console.log(difference);
-        //generateCSV(difference);
-        //generateCSV(NoAdAuditude);
-    },10000)
-}
-
-function generateCSV(data){
-    var CsvString = "";
-    data.forEach(function(RowItem, RowIndex) {
-        CsvString += RowItem + ',';
-        CsvString += "\r\n";
-    });
-    CsvString = "data:application/csv," + encodeURIComponent(CsvString);
-    var x = document.createElement("A");
-    x.setAttribute("href", CsvString );
-    x.setAttribute("download","ABDiffResult.csv");
-    document.body.appendChild(x);
-    x.click()
-}
 
 
 
@@ -101,16 +65,21 @@ function auditude(record,requestIndex){
 }
 
  function getXMLResponse(url,requestIndex,domain,record){
+      
         let x = new XMLHttpRequest();
         x.open("GET", url, true);
         x.onreadystatechange = function () {
+        //console.log(url,requestIndex);
         if (x.readyState == 4 && x.status == 200){
+            //console.log("in "+url,requestIndex);
             let doc = x.responseXML;
             x = doc.documentElement.childNodes;
             var txt,adDetails,j=0;
             for (i = 0; i < x.length ;i++) {
                 txt = x[i].nodeName; 
-                if (txt == "Body"){   
+                if (txt == "Body"){
+                      
+                    //console.log("in "+url,requestIndex); 
                      pod = x[i].getElementsByTagName("Pod")[0];
                         if(pod){
                             if(pod.getElementsByTagName("Lot")[0]){
@@ -121,34 +90,39 @@ function auditude(record,requestIndex){
                                     redirectURL=removeURLParameter_cb(redirectURL);
                                     adID = adDetails.getAttribute("id");
                                     if(domain=="http://ad.auditude.com"){
-                                        //AdFoundArrAuditude.push(record+" "+adSystem+" "+redirectURL);
+                                        //console.log(requestIndex," Ad Found auditude", domain);
+                                        AdFoundArrAuditude.push(record+" "+adSystem+" "+redirectURL);
                                        // AdFoundArrAuditude.push(record);
                                       //  AdFoundArrAuditude.push(adSystem);
                                       //  AdFoundArrAuditude.push(redirectURL);
                                     }
                                     if(domain=="http://ad.primetime.adobe.com"){
-                                       // AdFoundArrAdios.push(record+" "+adSystem+" "+redirectURL);    
-                                    }
-                                    
+                                        //console.log(requestIndex," Ad Found adios", domain);
+                                        AdFoundArrAdios.push(record+" "+adSystem+" "+redirectURL);
+                                        //if(requestIndex === (parseInt(totalCalls)-1)   
+                                    }    
                                     //console.log(adID,adSystem,redirectURL);
                                     //console.log(requestIndex,"Ad Found");
                                 }
                                 else {
-                                    //console.log(requestIndex,"No Ad Found");
+                                    //console.log(requestIndex,"No Ad Found", domain);
+                                   // console.log(url);
                                 //console.log(i);
                                 }
                             }
                             else {
-                                //console.log(requestIndex,"No Lot Found");
-                                NoAdAuditude.push(url);
+                               // console.log(requestIndex,"No Lot Found",domain);
+                                //console.log(url);
+                               // NoAdAuditude.push(url);
                             }
-                            
-                        }    
+                        }
                         else {
-                            console.log(requestIndex,"No Pod Found "+ pod);
-                            NoPodAuditude.push(url);
+                            //console.log(requestIndex,"No Pod Found ",domain);
+                            //console.log(url);
+                           // NoPodAuditude.push(url);
 
-                        }             
+                        }  
+                        if(requestIndex === (parseInt(totalCalls)-1) && domain=="http://ad.primetime.adobe.com"){setTimeOutFunc();}              
                  }        
             }
             //
@@ -181,5 +155,42 @@ function removeURLParameter_cb(url) {
     }
 }
 
+setTimeOutFunc = () => {
+    setTimeout(function(){
+        AdFoundArrAdios = AdFoundArrAdios.sort();
+        AdFoundArrAuditude = AdFoundArrAuditude.sort();
+        diffValue = AdFoundArrAuditude.length - AdFoundArrAdios.length;
+        console.log("Difference is - "+diffValue+" out of Total "+request+1+" request");
+    
+        let difference = AdFoundArrAuditude
+                     .filter(x => !AdFoundArrAdios.includes(x))
+                     .concat(AdFoundArrAdios.filter(x => !AdFoundArrAuditude.includes(x)));
+        //console.log(difference);
+        generateCSV(difference);
+        //generateCSV(NoAdAuditude);
+    },1000)
+}
 
-//console.log(AdFoundArr.length);
+function generateCSV(data){
+    //document.querySelector("#data").append(data)
+    var CsvString = "";
+    data.forEach(function(RowItem, RowIndex) {
+        CsvString += RowItem + ',';
+        CsvString += "\r\n";
+        //hyperlink = "http://ad.primetime.adobe.com"+CsvString;
+        //document.querySelector("#data").append(hyperlink);
+    });
+    
+    
+    //CsvString = "data:application/csv," + encodeURIComponent(hyperlink);
+    CsvString = "data:application/octetstream," + encodeURIComponent(CsvString);
+    
+
+    var x = document.createElement("A");
+    x.setAttribute("href", CsvString );
+    x.setAttribute("download","ABDiffResult"+Math.random()+".xls");
+    document.body.appendChild(x);
+    x.click()
+}
+
+//data:text/plain;charset=utf-8
